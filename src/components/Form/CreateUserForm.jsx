@@ -30,8 +30,9 @@ const CreateUserForm = ({
   editUser,
 }) => {
   const { close: closeAddUserModal } = useContext(ModalContext);
-  const { isEditModalOpen, openEditModal, closeEditModal } =
-    useContext(EditModalContext);
+  const { closeEditModal } = useContext(EditModalContext);
+  const [rerenderKey, setRerenderKey] = useState(false);
+
   const [formData, setFormData] = useState({
     id: Date.now(),
     name: "",
@@ -41,6 +42,7 @@ const CreateUserForm = ({
     gender: "",
     date: "",
   });
+  // const [errors, setErrors] = useState({});
   useEffect(() => {
     // Set formData to editUser data when editUserId changes
     if (editUserId) {
@@ -55,42 +57,95 @@ const CreateUserForm = ({
         setFormData(userToEdit);
       }
     }
-  }, [editUserId]);
-  // const [errors, setErrors] = useState({});
+  }, [editUserId, rerenderKey]);
+  const [errors, setErrors] = useState({});
+  const validateForm = () => {
+    const newErrors = {};
 
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!isValidEmail(formData.email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    if (!formData.contact.trim()) {
+      newErrors.contact = "Contact is required";
+    } else if (!isValidContact(formData.contact)) {
+      newErrors.contact = "Invalid contact format";
+    }
+
+    if (formData.weekday.length === 0) {
+      newErrors.weekday = "At least one weekday must be selected";
+    }
+
+    if (!formData.gender) {
+      newErrors.gender = "Gender is required";
+    }
+
+    if (!formData.date) {
+      newErrors.date = "Date of Birth is required";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidContact = (contact) => {
+    // You can replace this with your own contact validation logic
+    const contactRegex = /^\d{10}$/; // Assumes a 10-digit contact number
+    return contactRegex.test(contact);
+  };
+
+  // JSON.parse(localStorage.getItem("userData")) || [];
   const onSubmit = () => {
-    // Assuming you want to save each form submission as an array of objects
-    // Retrieve existing data from localStorage
-    const storedData = JSON.parse(localStorage.getItem("userData")) || [];
+    if (validateForm()) {
+      // Assuming you want to save each form submission as an array of objects
+      // Retrieve existing data from localStorage
+      const storedData = JSON.parse(localStorage.getItem("userData")) || [];
+      console.log("storedData", storedData);
 
-    // Check if the current form data already exists in the stored data
-    const isExistingUser = storedData.some((user) => user.id === formData.id);
+      // Check if the current form data already exists in the stored data
+      const isExistingUser = storedData.some((user) => user.id === formData.id);
 
-    // Create a new object representing the current form submission
-    const newFormData = {
-      id: isExistingUser ? formData.id : Date.now(),
-      name: formData.name,
-      email: formData.email,
-      contact: formData.contact,
-      weekday: formData.weekday,
-      gender: formData.gender,
-      date: formData.date,
-    };
+      // Create a new object representing the current form submission
+      const newFormData = {
+        id: isExistingUser ? formData.id : Date.now(),
+        name: formData.name,
+        email: formData.email,
+        contact: formData.contact,
+        weekday: formData.weekday,
+        gender: formData.gender,
+        date: formData.date,
+      };
 
-    // Update the stored data with the new form submission
-    const updatedData = isExistingUser
-      ? storedData.map((user) => (user.id === formData.id ? newFormData : user))
-      : [...storedData, newFormData];
+      // Update the stored data with the new form submission
+      const updatedData = isExistingUser
+        ? storedData.map((user) =>
+            user.id === formData.id ? newFormData : user
+          )
+        : [...storedData, newFormData];
 
-    // Update LocalStorage with the latest form data
-    localStorage.setItem("userData", JSON.stringify(updatedData));
+      // Update LocalStorage with the latest form data
+      localStorage.setItem("userData", JSON.stringify(updatedData));
+      // console.log("setData", setData);
+      console.log("updateData", updatedData);
+      closeAddUserModal();
+      closeEditModal();
 
-    // Close the modal
-    closeAddUserModal();
-    closeEditModal();
-
-    console.log("Form Data Submitted:", newFormData);
-    console.log("Form data stored in LocalStorage:", updatedData);
+      // console.log("Form Data Submitted:", newFormData);
+      console.log("Form data stored in LocalStorage:", updatedData);
+    }
+    setRerenderKey(true);
   };
   const handleCancel = () => {
     console.log("Form Canceled Clicked");
@@ -118,7 +173,7 @@ const CreateUserForm = ({
                 setFormData({ ...formData, name: e.target.value })
               }
             />
-            {/* {errors.name && <span style={{ color: "red" }}>{errors.name}</span>} */}
+            {errors.name && <span style={{ color: "red" }}>{errors.name}</span>}
           </FromRow>
           <FromRow>
             <Label htmlFor="email">Email</Label>
@@ -130,9 +185,9 @@ const CreateUserForm = ({
                 setFormData({ ...formData, email: e.target.value })
               }
             />
-            {/* {errors.email && (
+            {errors.email && (
               <span style={{ color: "red" }}>{errors.email}</span>
-            )} */}
+            )}
           </FromRow>
           <FromRow>
             <Label htmlFor="contact">Contact</Label>
@@ -144,9 +199,9 @@ const CreateUserForm = ({
                 setFormData({ ...formData, contact: e.target.value })
               }
             />
-            {/* {errors.contact && (
+            {errors.contact && (
               <span style={{ color: "red" }}>{errors.contact}</span>
-            )} */}
+            )}
           </FromRow>
           <FromRow>
             <Label htmlFor="weekday">Weekday</Label>
@@ -232,9 +287,9 @@ const CreateUserForm = ({
               />
               <Label htmlFor="friday">Friday</Label>
             </SelectorContainer>
-            {/* {errors.weekday && (
+            {errors.weekday && (
               <span style={{ color: "red" }}>{errors.weekday}</span>
-            )} */}
+            )}
           </FromRow>
           <FromRow>
             <Label htmlFor="gender">Gender</Label>
@@ -260,9 +315,9 @@ const CreateUserForm = ({
               />
               <Label htmlFor="female">Female</Label>
             </SelectorContainer>
-            {/* {errors.gender && (
+            {errors.gender && (
               <span style={{ color: "red" }}>{errors.gender}</span>
-            )} */}
+            )}
           </FromRow>
           <FromRow>
             <Label htmlFor="date">Date Of Birth</Label>
@@ -274,7 +329,7 @@ const CreateUserForm = ({
                 setFormData({ ...formData, date: e.target.value })
               }
             />
-            {/* {errors.date && <span style={{ color: "red" }}>{errors.date}</span>} */}
+            {errors.date && <span style={{ color: "red" }}>{errors.date}</span>}
           </FromRow>
 
           <FromRow>

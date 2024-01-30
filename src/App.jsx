@@ -5,7 +5,7 @@ import GlobalStyle from "./styles/GlobalStyles.js";
 import styled from "styled-components";
 import Modal from "./ui/Modal.jsx";
 import { ModalContext } from "./context/ModalOperations.jsx";
-import ConfirmDelete from "./ui/ConfirmDelete.jsx";
+// import ConfirmDelete from "./ui/ConfirmDelete.jsx";
 import { ConfirmDeleteContext } from "./context/ConfirmDeleteProvider.jsx";
 // import ConfirmDelete from "./ui/ConfirmDelete.jsx";
 
@@ -22,7 +22,7 @@ function App() {
   const { closeDelete } = useContext(ConfirmDeleteContext);
   const [data, setData] = useState([]);
   const [editUser, setEditUser] = useState(null);
-  const { isOpen, open, close } = useContext(ModalContext);
+  const { isOpen, open } = useContext(ModalContext);
 
   const toggleFormVisibility = (user) => {
     // If user is provided, set it to edit mode
@@ -39,17 +39,26 @@ function App() {
     closeDelete(); // Close the confirmation modal after deletion
   };
 
-  function userData() {
-    const userDataFromLocalStorage = localStorage.getItem("userData");
-    if (userDataFromLocalStorage) {
-      setData(JSON.parse(userDataFromLocalStorage));
+  const userData = () => {
+    try {
+      const userDataFromLocalStorage = localStorage.getItem("userData");
+      if (userDataFromLocalStorage) {
+        const parsedUserData = JSON.parse(userDataFromLocalStorage);
+        setData(parsedUserData);
+        console.log("Updated data from LS", userDataFromLocalStorage);
+      }
+    } catch (error) {
+      console.error("Error fetching or parsing user data:", error);
     }
-  }
-
+  };
+  // userData();
   useEffect(() => {
-    userData();
-  }, []);
+    const fetchData = () => {
+      userData(); // Call the function to update data
+    };
 
+    fetchData();
+  }, []);
   return (
     <>
       <GlobalStyle />

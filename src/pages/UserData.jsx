@@ -2,15 +2,18 @@ import Row from "../ui/Row";
 import Heading from "../ui/Heading";
 import Table from "../ui/Table";
 import Button from "../ui/Button";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Modal from "../ui/Modal";
 import ConfirmDelete from "../ui/ConfirmDelete";
 import CreateUserForm from "../components/Form/CreateUserForm";
+import { EditModalContext } from "../context/EditModalProvider";
+import { MdDelete } from "react-icons/md";
+import { FaRegEdit } from "react-icons/fa";
 
 const UserData = ({ onClick, onDelete, data }) => {
   const [confirmation, setConfirmation] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState(null);
-  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const { isEditModalOpen, openEditModal } = useContext(EditModalContext);
   const [editUserId, setEditUserId] = useState(null);
 
   const handleDelete = (id) => {
@@ -21,7 +24,7 @@ const UserData = ({ onClick, onDelete, data }) => {
   const handleEdit = (id) => {
     console.log("id to be edited", id);
     setEditUserId(id);
-    setIsEditFormOpen(true);
+    openEditModal(true);
   };
 
   const handleConfirmDelete = () => {
@@ -62,9 +65,19 @@ const UserData = ({ onClick, onDelete, data }) => {
                 <div>{user.weekday},</div>
                 <div>{user.gender}</div>
                 <div>{user.date}</div>
-                <div>
-                  <button onClick={() => handleEdit(user.id)}>Edit</button>
-                  <button onClick={() => handleDelete(user.id)}>Delete</button>
+                <div className="btn-gap">
+                  <Button
+                    variation="primary"
+                    onClick={() => handleEdit(user.id)}
+                  >
+                    <FaRegEdit className="icon" />
+                  </Button>
+                  <Button
+                    variation="danger"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    <MdDelete className="icon" />
+                  </Button>
                 </div>
               </Table.Row>
             ))}
@@ -86,7 +99,7 @@ const UserData = ({ onClick, onDelete, data }) => {
         </Modal>
       )}
 
-      {isEditFormOpen && (
+      {isEditModalOpen && (
         <Modal>
           <CreateUserForm editUserId={editUserId} />
         </Modal>

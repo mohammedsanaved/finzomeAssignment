@@ -136,6 +136,14 @@ h6 {
   overflow-wrap: break-word;
   hyphens: auto;
 }
+.icon {
+  font-size: large;
+  font-weight: 900;
+}
+.btn-gap {
+  display: flex;
+  justify-content: space-between;
+}
 
 img {
   max-width: 100%;
@@ -143,5 +151,5 @@ img {
   /* For dark mode */
   filter: grayscale(var(--image-grayscale)) opacity(var(--image-opacity));
 }
-`
+`;
 export default GlobalStyle;
